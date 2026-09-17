@@ -137,8 +137,8 @@ h4 {
   font-weight: 600;
 }
 h1 {
-  font-size: 26px;
-  line-height: 1.2;
+  font-size: 22px;
+  line-height: 1.25;
 }
 h2 {
   font-size: 20px;
@@ -439,24 +439,42 @@ tbody tr:hover td {
 .legend {
   margin: 8px 0 0;
 }
-.jump {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin: 18px 0 6px;
+.overview {
+  margin-bottom: 56px;
 }
 
-/* descriptor section */
+/* descriptor section: a rounded box, with a sticky head under the top bar */
+.overview {
+  margin-bottom: 0;
+}
 .descriptor {
-  margin-top: 36px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
+  margin-top: 32px;
+  padding: 0 20px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg);
 }
 .descriptor-head {
+  position: sticky;
+  top: 52px; /* the height of the top bar */
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 14px;
+  margin: 0 -20px 16px;
+  padding: 14px 20px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+}
+@media (max-width: 760px) {
+  .descriptor {
+    padding: 0 12px 12px;
+  }
+  .descriptor-head {
+    margin: 0 -12px 12px;
+    padding: 12px 12px 10px;
+  }
 }
 .descriptor-grid {
   display: grid;
@@ -531,21 +549,8 @@ tbody tr:hover td {
   align-items: center;
   gap: 8px;
 }
-.verdict-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  background: var(--faint);
-}
-.verdict-dot.pass {
-  background: var(--pass);
-}
-.verdict-dot.disagree {
-  background: var(--amber);
-}
-.verdict-dot.all-differ {
-  background: var(--fail);
+.case-title .pill {
+  flex: none;
 }
 .case-meta {
   display: flex;
@@ -559,11 +564,22 @@ tbody tr:hover td {
 }
 .case-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
+  margin-top: 40px;
+}
+.compare-arrow {
+  align-self: start;
+  display: flex;
+  justify-content: center;
+  color: var(--muted);
+  padding-top: 110px; /* level with the first screen, below the column titles */
 }
 @media (max-width: 760px) {
+  .compare-arrow {
+    display: none;
+  }
   .case-body {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -665,7 +681,7 @@ tbody tr:hover td {
   color: var(--warn);
 }
 .verdict-line {
-  margin-top: 12px;
+  margin: 2px 0 0;
   font-size: 13px;
   color: var(--muted);
 }
@@ -702,4 +718,438 @@ tbody tr:hover td {
 }
 .prov-table tr.uncertain td {
   color: var(--muted);
+}
+
+/* report header: title row and icons */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eyebrow-link {
+  display: inline-flex;
+  color: var(--muted);
+}
+.eyebrow-link:hover {
+  color: var(--text);
+}
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.title-row h1 {
+  margin: 0;
+}
+.gh-link {
+  display: inline-flex;
+  color: var(--text);
+  flex: none;
+}
+.gh-link:hover {
+  color: var(--muted);
+}
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.totals {
+  color: var(--text-soft);
+}
+.totals b {
+  font-variant-numeric: tabular-nums;
+}
+.totals b.pass {
+  color: var(--pass);
+}
+.totals b.warn {
+  color: var(--warn);
+}
+.totals b.fail {
+  color: var(--fail);
+}
+
+.h3-label {
+  font-weight: 500;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+/* sidebar: the file list, an overlay that is also a scroll guide */
+.report-layout > main {
+  margin: 0 auto;
+}
+.sidebar-wrap {
+  display: contents;
+}
+.sidebar {
+  position: fixed;
+  top: 52px;
+  left: 0;
+  bottom: 0;
+  z-index: 14;
+  width: min(320px, 90vw);
+  overflow-y: auto;
+  padding: 48px 10px 24px 8px;
+  font-size: 13px;
+  background: var(--bg);
+  border-right: 1px solid var(--border-strong);
+  box-shadow: var(--shadow);
+}
+.sidebar.is-hidden {
+  display: none;
+}
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px 8px;
+}
+.sidebar-title.sub {
+  margin-top: 14px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: var(--text-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+.sidebar-link:hover {
+  background: var(--card-2);
+  color: var(--text);
+}
+.sidebar-link.is-active {
+  color: var(--text);
+  background: var(--card);
+  border-left-color: var(--blue);
+  font-weight: 500;
+}
+.sidebar-n {
+  flex: none;
+  min-width: 1.4em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-name {
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+.sig {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.sig.pass {
+  background: var(--pass);
+}
+.sig.warn {
+  background: var(--warn);
+}
+.sig.fail {
+  background: var(--fail);
+}
+.sidebar-toggle {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-soft);
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.sidebar-toggle:hover {
+  color: var(--text);
+}
+
+.h4-label {
+  font-weight: 500;
+  color: var(--muted);
+  margin-right: 2px;
+}
+
+/* case meta: one labelled line per fact */
+dl.case-meta {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px 12px;
+  margin: 6px 0 0;
+}
+dl.case-meta dt {
+  color: var(--muted);
+}
+dl.case-meta dt::after {
+  content: ":";
+}
+dl.case-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+dl.case-meta dd.signature {
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+/* column titles, centred; the expected screen sits at the vertical centre
+   of the runner cards, under its title */
+.section-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+.section-sub {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.section-head {
+  margin-bottom: 10px;
+}
+.impls > .section-head {
+  margin-bottom: 0;
+}
+
+/* implementation cards: the head is a button; a pass starts collapsed */
+button.impl-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.impl-head .impl-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.impl-caret {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--text-soft);
+  transition: transform 0.15s ease;
+  transform: rotate(-90deg); /* points right when collapsed */
+}
+.impl-caret.is-open {
+  transform: rotate(0deg); /* points down when open */
+}
+button.impl-head:hover .impl-caret {
+  color: var(--text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .impl-caret {
+    transition: none;
+  }
+}
+/* every implementation card ends with a dashed rule, open or collapsed */
+.impl {
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border);
+}
+.impl.collapsed {
+  padding-bottom: 2px;
+}
+.impls > .impl + .impl {
+  margin-top: 6px;
+}
+
+.impl-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* deployments: one block per address, with the ABI verdict under it */
+.deployment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+.deployment-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.fail-text {
+  color: var(--fail);
+}
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--blue);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.addr-list {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  color: var(--text-soft);
+}
+
+/* function parameters of a case: a collapsible section, marked like the field provenance */
+.params {
+  margin-top: 10px;
+}
+.params > summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+.params > summary .section-title {
+  display: inline;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+}
+.params > summary .section-sub {
+  display: inline;
+  margin: 0 0 0 8px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.params > .tablewrap,
+.params > .small {
+  margin-top: 8px;
+}
+.params-notice {
+  margin: 10px 0 0;
+  color: var(--text-soft);
+  font-style: italic;
+}
+.params-table {
+  font-size: 13px;
+  min-width: 640px;
+}
+.params-table th,
+.params-table td {
+  padding: 5px 10px;
+  vertical-align: top;
+}
+.params-table tr.sub td {
+  color: var(--text-soft);
+}
+.params-table td.value {
+  max-width: 320px;
+  overflow-wrap: anywhere;
+}
+.params-table td.doc {
+  color: var(--muted);
+  max-width: 320px;
+}
+.pass-text {
+  color: var(--pass);
+}
+.decoded-details summary {
+  cursor: pointer;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+pre.decoded {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-x: auto;
+  max-height: 480px;
+  overflow-y: auto;
+}
+.params-table td.value .muted-value {
+  color: var(--muted);
+}
+
+/* tree guides in the parameter name cell: full-height lines, like a file tree */
+.params-table td.name-cell {
+  position: relative;
+  white-space: nowrap;
+}
+.tree {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+}
+.tree-seg {
+  position: relative;
+  width: 16px;
+  height: 100%;
+}
+.tree-seg.pipe::before,
+.tree-seg.tee::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border-strong);
+}
+.tree-seg.elbow::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 0;
+  height: 50%;
+  border-left: 1px solid var(--border-strong);
+}
+.tree-seg.tee::after,
+.tree-seg.elbow::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  width: 9px;
+  border-top: 1px solid var(--border-strong);
+}
+
+/* the Sourcify logo inside a "verified" pill */
+.pill .pill-logo {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: -2px;
+  margin-right: 4px;
 }

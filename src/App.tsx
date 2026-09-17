@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { DescriptorSection, anchorOf } from "./components/DescriptorSection";
+import { DescriptorSection } from "./components/DescriptorSection";
+import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
 import { Landing } from "./components/Landing";
 import { Overview } from "./components/Overview";
@@ -15,6 +16,9 @@ type State =
 export function App() {
   const [state, setState] = useState<State>({ kind: "landing", error: null });
   const [failuresOnly, setFailuresOnly] = useState(false);
+  // The outline is an overlay: closed by default, opened by a hover on its
+  // button, and closed when the mouse leaves it.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const chains = useChains();
 
   useEffect(() => {
@@ -33,8 +37,8 @@ export function App() {
         <div className="topbarInner">
           <a className="brand" href={import.meta.env.BASE_URL}>
             <img src={`${import.meta.env.BASE_URL}sourcify.png`} alt="" />
-            <span className="vt">sourcify</span>
-            <span className="vt muted">test report</span>
+            <span className="vt">sourcify.dev</span>
+            <span className="vt muted">- ERC7730 test report viewer</span>
           </a>
           <nav className="topnav">
             <a href="https://github.com/ethereum/clear-signing-erc7730-registry">registry</a>
@@ -46,22 +50,18 @@ export function App() {
       {state.kind === "landing" && <Landing error={state.error} onLocal={(bundle, name) => setState({ kind: "ready", bundle, index: null, currentRun: bundle.run.id, name })} />}
       {state.kind === "loading" && <main className="landing muted">Loading the report…</main>}
       {state.kind === "ready" && (
-        <main className="report">
-          <Header bundle={state.bundle} index={state.index} currentRun={state.currentRun} failuresOnly={failuresOnly} onFailuresOnly={setFailuresOnly} />
-          {state.name && <p className="small muted">Local file {state.name}.</p>}
-          <Overview bundle={state.bundle} />
-          <nav className="jump small">
-            {state.bundle.descriptors.map((d) => (
-              <a key={d.path} href={`#${anchorOf(d)}`}>
-                {d.name}
-              </a>
+        <div className="report-layout">
+          <Sidebar bundle={state.bundle} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} onOpen={() => setSidebarOpen(true)} onClose={() => setSidebarOpen(false)} />
+          <main className="report">
+            <Header bundle={state.bundle} index={state.index} currentRun={state.currentRun} failuresOnly={failuresOnly} onFailuresOnly={setFailuresOnly} />
+            {state.name && <p className="small muted">Local file {state.name}.</p>}
+            <Overview bundle={state.bundle} />
+            {state.bundle.descriptors.map((d, i) => (
+              <DescriptorSection key={d.path} bundle={state.bundle} d={d} n={i + 1} chains={chains} failuresOnly={failuresOnly} />
             ))}
-          </nav>
-          {state.bundle.descriptors.map((d) => (
-            <DescriptorSection key={d.path} bundle={state.bundle} d={d} chains={chains} failuresOnly={failuresOnly} />
-          ))}
-          {state.bundle.descriptors.length === 0 && <p className="muted">This run tested no descriptor.</p>}
-        </main>
+            {state.bundle.descriptors.length === 0 && <p className="muted">This run tested no descriptor.</p>}
+          </main>
+        </div>
       )}
     </>
   );

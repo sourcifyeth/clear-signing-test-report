@@ -24,8 +24,9 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
       <div className={`intent${marked(at(prefix, "intent"))}${marked(at(prefix, "interpolatedIntent"))}`}>
         {typeof intent === "string" && intent !== "" ? intent : <span className="muted">(no intent)</span>}
       </div>
-      {rendered.owner !== undefined && (
-        <div className={`owner${marked(at(prefix, "owner"))}`}>{typeof rendered.owner === "string" ? rendered.owner : render(rendered.owner)}</div>
+      {/* The owner is metadata, not something the reviewer judges. It is shown only when it differs from the expected output. */}
+      {rendered.owner !== undefined && marked(at(prefix, "owner")) !== "" && (
+        <div className="owner diff">owner: {typeof rendered.owner === "string" ? rendered.owner : render(rendered.owner)}</div>
       )}
       {rendered.interpolatedIntent !== undefined && rendered.intent !== undefined && rendered.interpolatedIntent !== rendered.intent && (
         <div className="intent-literal">intent: {render(rendered.intent)}</div>

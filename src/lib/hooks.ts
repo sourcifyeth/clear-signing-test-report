@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { DescriptorReport } from "./bundle";
 import { rawAtSha } from "./links";
 import { chains, deployment, type ChainInfo, type DeploymentInfo } from "./sourcify";
+import { functionDocs, type FunctionDocs } from "./natspec";
 import type { TestFileCase } from "./decode";
 
 export function useChains(): Map<number, ChainInfo> {
@@ -68,4 +69,19 @@ export function useTestFile(headRepo: string | null, headSha: string | null, d: 
     };
   }, [url]);
   return state;
+}
+
+const NO_DOCS: FunctionDocs = { source: "none", notice: null, details: null, params: {} };
+
+/** The NatSpec of a function on a contract, from Sourcify. Empty until it arrives, and when there is none. */
+export function useFunctionDocs(chainId: unknown, address: unknown, format: string | null): FunctionDocs {
+  const [docs, setDocs] = useState<FunctionDocs>(NO_DOCS);
+  useEffect(() => {
+    let live = true;
+    functionDocs(chainId, address, format).then((d) => live && setDocs(d));
+    return () => {
+      live = false;
+    };
+  }, [chainId, address, format]);
+  return docs;
 }

@@ -1,5 +1,5 @@
 import { formatName, type Bundle, type DescriptorReport } from "../lib/bundle";
-import { descriptorHasDisagreement, testedFormats, verdictOf } from "../lib/classify";
+import { testedFormats, verdictCounts, verdictOf } from "../lib/classify";
 import { useTestFile } from "../lib/hooks";
 import { fileAtSha } from "../lib/links";
 import type { ChainInfo } from "../lib/sourcify";
@@ -9,13 +9,32 @@ import { Deployments } from "./Deployments";
 interface Props {
   bundle: Bundle;
   d: DescriptorReport;
+  n: number;
   chains: Map<number, ChainInfo>;
   failuresOnly: boolean;
 }
 
 export const anchorOf = (d: DescriptorReport) => `d-${d.entity}-${d.name}`;
 
-export function DescriptorSection({ bundle, d, chains, failuresOnly }: Props) {
+/** The non-passing cases of a descriptor, as counts. Nothing when all pass. */
+export function VerdictPills({ d, implIds, short = false }: { d: DescriptorReport; implIds: string[]; short?: boolean }) {
+  const n = verdictCounts(d, implIds);
+  const pills: { text: string; tone: string }[] = [];
+  if (n["all-differ"] > 0) pills.push({ text: short ? `${n["all-differ"]} fail everywhere` : `${n["all-differ"]} case${n["all-differ"] === 1 ? "" : "s"} fail${n["all-differ"] === 1 ? "s" : ""} on all runners`, tone: "fail" });
+  if (n.disagree > 0) pills.push({ text: short ? `${n.disagree} disagree` : `${n.disagree} case${n.disagree === 1 ? "" : "s"} disagree`, tone: "warn" });
+  if (n.error + n.none > 0) pills.push({ text: `${n.error + n.none} error${n.error + n.none === 1 ? "" : "s"}`, tone: "neutral" });
+  return (
+    <>
+      {pills.map((p) => (
+        <span key={p.text} className={`pill ${p.tone}`}>
+          {p.text}
+        </span>
+      ))}
+    </>
+  );
+}
+
+export function DescriptorSection({ bundle, d, n, chains, failuresOnly }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
   const testFile = useTestFile(bundle.pr.headRepo, bundle.pr.headSha, d);
   const link = fileAtSha(bundle.pr.headRepo, bundle.pr.headSha, d.path);
@@ -27,8 +46,8 @@ export function DescriptorSection({ bundle, d, chains, failuresOnly }: Props) {
     <section className="descriptor" id={anchorOf(d)}>
       <header className="descriptor-head">
         <h3>
-          {d.entity}/{d.name}
-          {descriptorHasDisagreement(d, implIds) && <span className="pill warn">implementations disagree</span>}
+          <span className="h3-label">Descriptor file {n}:</span> {d.entity}/{d.name}
+          <VerdictPills d={d} implIds={implIds} />
         </h3>
         <div className="small muted">
           <span className={`pill ${d.change?.descriptor === "unchanged" ? "neutral" : "info"}`}>descriptor {d.change?.descriptor ?? "?"}</span>{" "}

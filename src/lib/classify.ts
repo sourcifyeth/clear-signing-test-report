@@ -43,6 +43,22 @@ export function descriptorHasDisagreement(d: DescriptorReport, implIds: string[]
   return (d.cases ?? []).some((c) => verdictOf(c, implIds) === "disagree");
 }
 
+/** Short pill text per verdict, for a case title. */
+export const VERDICT_PILL: Record<Verdict, { text: string; tone: "pass" | "warn" | "fail" | "neutral" }> = {
+  pass: { text: "pass everywhere", tone: "pass" },
+  disagree: { text: "implementations disagree", tone: "warn" },
+  "all-differ": { text: "fails on all runners", tone: "fail" },
+  error: { text: "error", tone: "neutral" },
+  none: { text: "not run", tone: "neutral" },
+};
+
+/** How many cases of a descriptor end in each verdict. */
+export function verdictCounts(d: DescriptorReport, implIds: string[]): Record<Verdict, number> {
+  const out: Record<Verdict, number> = { pass: 0, disagree: 0, "all-differ": 0, error: 0, none: 0 };
+  for (const c of d.cases ?? []) out[verdictOf(c, implIds)]++;
+  return out;
+}
+
 export function testedFormats(d: DescriptorReport): { tested: number; total: number; untested: string[] } {
   const entries = Object.entries(d.formats ?? {});
   const untested = entries.filter(([, f]) => (f.cases ?? []).length === 0).map(([k]) => k);

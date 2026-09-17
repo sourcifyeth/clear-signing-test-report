@@ -11,7 +11,7 @@
  *   GET /v2/contract/{chain}/{address}?fields=abi → { abi: [...] }
  *   CORS: access-control-allow-origin: *
  */
-import { toFunctionSelector, type AbiFunction } from "viem";
+import { getAddress, isAddress as isChecksummedAddress, toFunctionSelector, type AbiFunction } from "viem";
 import { isAddress, isChainId } from "./links";
 
 const BASE = "https://sourcify.dev/server";
@@ -50,7 +50,9 @@ export interface Implementation {
 }
 
 export interface DeploymentInfo {
-  status: "checking" | "verified" | "unverified" | "error";
+  status: "checking" | "verified" | "unverified" | "invalid-address" | "error";
+  /** For "invalid-address": what is wrong with it. */
+  note?: string;
   match: string | null;
   isProxy: boolean;
   proxyType: string | null;
@@ -93,8 +95,20 @@ export function deployment(chainId: unknown, address: unknown): Promise<Deployme
   let p: Promise<DeploymentInfo> | undefined = cache.get(key);
   if (!p) {
     p = (async (): Promise<DeploymentInfo> => {
+      // A mixed-case address must carry a valid EIP-55 checksum. Sourcify
+      // rejects a wrong one with 400, and so does every careful wallet.
+      if (!isChecksummedAddress(address, { strict: true })) {
+        let expected = "";
+        try {
+          expected = getAddress(address.toLowerCase());
+        } catch {
+          // not even a hex address; the pattern check above should have caught it
+        }
+        return { ...error, status: "invalid-address" as const, note: `wrong EIP-55 checksum${expected ? `, the checksummed form is ${expected}` : ""}` };
+      }
       const { status, body } = await json(`${BASE}/v2/contract/${chainId}/${address}?fields=proxyResolution`);
       if (status === 404) return { ...error, status: "unverified" as const };
+      if (status === 400) return { ...error, status: "invalid-address" as const, note: "Sourcify rejects this address" };
       if (status !== 200 || !body || typeof body !== "object") return error;
       const b = body as { match?: string; proxyResolution?: { isProxy?: boolean; proxyType?: string | null; implementations?: { address?: string; name?: string }[] } };
       const pr = b.proxyResolution ?? {};

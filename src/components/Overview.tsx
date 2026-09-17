@@ -1,7 +1,7 @@
 import type { Bundle } from "../lib/bundle";
-import { countsFor, descriptorHasDisagreement, testedFormats } from "../lib/classify";
+import { countsFor, testedFormats } from "../lib/classify";
 import { fileAtSha } from "../lib/links";
-import { anchorOf } from "./DescriptorSection";
+import { VerdictPills, anchorOf } from "./DescriptorSection";
 import { DeploymentsSummary } from "./Deployments";
 
 export function Overview({ bundle }: { bundle: Bundle }) {
@@ -52,10 +52,10 @@ export function Overview({ bundle }: { bundle: Bundle }) {
                         source
                       </a>
                     )}
-                    {descriptorHasDisagreement(d, implIds) && <span className="pill warn">disagree</span>}
+                    <VerdictPills d={d} implIds={implIds} short />
                   </td>
                   <td>
-                    <span className={`pill ${d.change?.descriptor === "unchanged" ? "neutral" : "info"}`}>{d.change?.descriptor ?? "?"}</span>{" "}
+                    <span className={`pill ${d.change?.descriptor === "unchanged" ? "neutral" : "info"}`}>descriptor {d.change?.descriptor ?? "?"}</span>{" "}
                     {d.change?.tests && d.change.tests !== "unchanged" && <span className="pill info">tests {d.change.tests}</span>}
                   </td>
                   <td className={`num ${cov.tested < cov.total ? "warn-text" : ""}`}>
