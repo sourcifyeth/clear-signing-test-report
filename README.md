@@ -2,7 +2,7 @@
 
 A static web page that shows the result of the clear-signing tests of one pull request to the [ERC-7730 registry](https://github.com/ethereum/clear-signing-erc7730-registry). For every test case it draws what the wallet would display, what each implementation rendered, which cells differ, and where each value comes from in the descriptor. It also checks the deployments of a descriptor on Sourcify.
 
-Live: https://sourcifyeth.github.io/clear-signing-test-report/
+Live: https://tests.erc7730.sourcify.dev/
 
 ## How a report gets here
 
