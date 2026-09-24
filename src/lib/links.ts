@@ -27,12 +27,6 @@ export function fileAtSha(repo: string | null, sha: string | null, path: string)
   return `https://github.com/${repo}/blob/${sha}/${path}`;
 }
 
-/** The raw URL of a file at a commit, or null. */
-export function rawAtSha(repo: string | null, sha: string | null, path: string): string | null {
-  if (!isRepoSlug(repo) || !isSha(sha) || !isRepoPath(path)) return null;
-  return `https://raw.githubusercontent.com/${repo}/${sha}/${path}`;
-}
-
 export function commitUrl(sha: string | null): string | null {
   return isSha(sha) ? `https://github.com/${REGISTRY}/commit/${sha}` : null;
 }

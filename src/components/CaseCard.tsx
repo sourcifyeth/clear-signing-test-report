@@ -2,11 +2,8 @@ import { useState } from "react";
 import { formatName, type Bundle, type Case, type DescriptorReport, type Status } from "../lib/bundle";
 import { VERDICT_PILL, verdictOf } from "../lib/classify";
 import { render } from "../lib/decode";
-import type { TestFileState } from "../lib/hooks";
 import { contractUrl, isTxHash } from "../lib/links";
 import type { ChainInfo } from "../lib/sourcify";
-import { Parameters } from "./Parameters";
-import { Provenance } from "./Provenance";
 import { Screen } from "./Screen";
 
 interface Props {
@@ -14,7 +11,6 @@ interface Props {
   d: DescriptorReport;
   c: Case;
   chains: Map<number, ChainInfo>;
-  testFile: TestFileState;
 }
 
 const STATUS_TEXT: Record<Status, string> = { pass: "pass", fail: "fail", error: "error", skipped: "skipped" };
@@ -67,10 +63,9 @@ function wei(v: string | undefined): string | null {
   return `${whole}${frac ? "." + frac : ""} native`;
 }
 
-export function CaseCard({ bundle, d, c, chains, testFile }: Props) {
+export function CaseCard({ bundle, d, c, chains }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
   const verdict = verdictOf(c, implIds);
-  const [open, setOpen] = useState(false);
   const input = c.input ?? { type: "unknown" };
   const chain = typeof input.chainId === "number" ? chains.get(input.chainId)?.name ?? `chain ${input.chainId}` : null;
   const toUrl = contractUrl(input.chainId, input.to);
@@ -161,13 +156,6 @@ export function CaseCard({ bundle, d, c, chains, testFile }: Props) {
           ))}
         </div>
       </div>
-
-      <Parameters c={c} d={d} testFile={testFile} />
-
-      <details className="prov-details" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
-        <summary>Field provenance</summary>
-        {open && <Provenance c={c} d={d} testFile={testFile} />}
-      </details>
     </article>
   );
 }
