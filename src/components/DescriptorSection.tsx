@@ -1,6 +1,5 @@
 import { formatName, type Bundle, type DescriptorReport } from "../lib/bundle";
 import { testedFormats, verdictCounts, verdictOf } from "../lib/classify";
-import { useTestFile } from "../lib/hooks";
 import { fileAtSha } from "../lib/links";
 import type { ChainInfo } from "../lib/sourcify";
 import { CaseCard } from "./CaseCard";
@@ -36,7 +35,6 @@ export function VerdictPills({ d, implIds, short = false }: { d: DescriptorRepor
 
 export function DescriptorSection({ bundle, d, n, chains, failuresOnly }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
-  const testFile = useTestFile(bundle.pr.headRepo, bundle.pr.headSha, d);
   const link = fileAtSha(bundle.pr.headRepo, bundle.pr.headSha, d.path);
   const cov = testedFormats(d);
   const cases = (d.cases ?? []).filter((c) => !failuresOnly || verdictOf(c, implIds) !== "pass");
@@ -106,7 +104,7 @@ export function DescriptorSection({ bundle, d, n, chains, failuresOnly }: Props)
 
       <div className="cases">
         {cases.map((c) => (
-          <CaseCard key={c.index} bundle={bundle} d={d} c={c} chains={chains} testFile={testFile} />
+          <CaseCard key={c.index} bundle={bundle} d={d} c={c} chains={chains} />
         ))}
         {hidden > 0 && (
           <p className="muted small">
