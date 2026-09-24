@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { isRendered, type Rendered } from "../lib/bundle";
 import { render } from "../lib/decode";
 
@@ -10,6 +11,28 @@ interface Props {
 }
 
 const at = (prefix: string, key: string) => (prefix === "" ? key : `${prefix}.${key}`);
+
+/*
+ * A value can be very long, e.g. the raw calldata of a nested call (some KB
+ * of hex). Such a value is shown as its start and end, with a control that
+ * shows all of it, so that one field does not fill the screen.
+ */
+const LONG = 120;
+const HEAD = 42;
+const TAIL = 16;
+
+function Value({ text }: { text: string }) {
+  const [all, setAll] = useState(false);
+  if (text.length <= LONG) return <>{text}</>;
+  return (
+    <>
+      <span title={all ? undefined : text}>{all ? text : `${text.slice(0, HEAD)}…${text.slice(-TAIL)}`}</span>{" "}
+      <button type="button" className="linklike value-toggle" onClick={() => setAll((v) => !v)} aria-expanded={all}>
+        {all ? "show less" : `show all (${text.length} characters)`}
+      </button>
+    </>
+  );
+}
 
 /** One rendered output drawn like a wallet screen. */
 export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
@@ -47,7 +70,9 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
           return (
             <div key={i} className={`field${whole}`}>
               <span className={`label${marked(`${p}.label`)}`}>{render(f.label)}</span>
-              <span className={`value mono${marked(`${p}.value`)}`}>{render(f.value)}</span>
+              <span className={`value mono${marked(`${p}.value`)}`}>
+                <Value text={render(f.value)} />
+              </span>
             </div>
           );
         })}
