@@ -436,6 +436,15 @@ tbody tr:hover td {
 .overview-table .src {
   margin-left: 8px;
 }
+/* the deployments cell: one pill per status, wrapped when the column is narrow */
+.deploy-summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.deploy-summary .pill {
+  margin-left: 0;
+}
 .legend {
   margin: 8px 0 0;
 }
