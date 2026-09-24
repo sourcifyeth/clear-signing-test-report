@@ -25,11 +25,10 @@ let chainsPromise: Promise<Map<number, ChainInfo>> | null = null;
 
 export function chains(): Promise<Map<number, ChainInfo>> {
   if (!chainsPromise) {
-    chainsPromise = fetch(`${BASE}/chains`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then((list: unknown) => {
+    chainsPromise = json(`${BASE}/chains`)
+      .then(({ status, body: list }) => {
         const map = new Map<number, ChainInfo>();
-        if (Array.isArray(list)) {
+        if (status === 200 && Array.isArray(list)) {
           for (const c of list) {
             if (c && typeof c === "object" && typeof c.chainId === "number" && typeof c.name === "string") {
               map.set(c.chainId, { name: c.name, chainId: c.chainId });
@@ -63,7 +62,34 @@ export interface DeploymentInfo {
 
 const cache = new Map<string, Promise<DeploymentInfo>>();
 
-async function json(url: string): Promise<{ status: number; body: unknown }> {
+/*
+ * Every Sourcify request of the page goes through one queue. A large pull
+ * request lists many deployments, and the page used to send them all at
+ * once: a pull request with 66 descriptors sent 224 requests, and 140 failed.
+ * The server rate-limits such a burst, and its 429 answer has no CORS
+ * header, so the browser reports a network error. At most MAX_IN_FLIGHT
+ * requests run at a time; a failed one is tried once more after a short
+ * wait; the same URL in flight is fetched once.
+ */
+const MAX_IN_FLIGHT = 6;
+let inFlight = 0;
+const waiting: (() => void)[] = [];
+const inFlightByUrl = new Map<string, Promise<{ status: number; body: unknown }>>();
+
+/** Runs `task` when a slot is free. A finished task hands its slot to the next one. */
+async function inSlot<T>(task: () => Promise<T>): Promise<T> {
+  if (inFlight < MAX_IN_FLIGHT) inFlight++;
+  else await new Promise<void>((resolve) => waiting.push(resolve));
+  try {
+    return await task();
+  } finally {
+    const next = waiting.shift();
+    if (next) next();
+    else inFlight--;
+  }
+}
+
+async function fetchOnce(url: string): Promise<{ status: number; body: unknown }> {
   const r = await fetch(url);
   let body: unknown = null;
   try {
@@ -72,6 +98,29 @@ async function json(url: string): Promise<{ status: number; body: unknown }> {
     body = null;
   }
   return { status: r.status, body };
+}
+
+const retryable = (status: number) => status === 429 || status >= 500;
+const pause = () => new Promise<void>((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
+
+/** GET a Sourcify URL through the queue, with one retry. Throws when the retry throws too. */
+export function json(url: string): Promise<{ status: number; body: unknown }> {
+  let p = inFlightByUrl.get(url);
+  if (!p) {
+    p = (async () => {
+      try {
+        const first = await inSlot(() => fetchOnce(url));
+        if (!retryable(first.status)) return first;
+      } catch {
+        // a network error, or a 429 without CORS headers: try once more below
+      }
+      // The wait is outside the slot, so that other requests can run.
+      await pause();
+      return inSlot(() => fetchOnce(url));
+    })().finally(() => inFlightByUrl.delete(url));
+    inFlightByUrl.set(url, p);
+  }
+  return p;
 }
 
 function selectorsOf(abi: unknown, into: Set<string>) {

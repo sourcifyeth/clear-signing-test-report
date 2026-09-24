@@ -36,6 +36,8 @@ All read-only, from the browser, after the page has rendered:
 - `https://sourcify.dev/server/chains` for chain names.
 - `https://sourcify.dev/server/v2/contract/{chainId}/{address}?fields=proxyResolution`, then `?fields=abi` on the implementation or the contract. One field per call.
 
+The page sends at most 6 Sourcify requests at a time. A request that fails, or gets 429 or a 5xx status, is tried once more after 1 to 2 seconds. The same URL is fetched once while it is in flight.
+
 Every string in a bundle comes from a pull request and is treated as text. Links are built only from values that match a strict pattern.
 
 ## Run locally
