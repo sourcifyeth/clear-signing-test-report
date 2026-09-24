@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Bundle, DescriptorReport } from "../lib/bundle";
 import { verdictOf } from "../lib/classify";
 import { anchorOf } from "./DescriptorSection";
+import { suggestionsByFile } from "./Suggestions";
 
 interface Props {
   bundle: Bundle;
@@ -52,7 +53,8 @@ function useActiveSection(ids: string[]): string | null {
 
 export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
-  const ids = ["overview", ...bundle.descriptors.map(anchorOf)];
+  const hasSuggestions = suggestionsByFile(bundle).length > 0;
+  const ids = ["overview", ...bundle.descriptors.map(anchorOf), ...(hasSuggestions ? ["suggestions"] : [])];
   const active = useActiveSection(ids);
   useEffect(() => {
     if (!open) return;
@@ -91,6 +93,11 @@ export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
             );
           })}
           {bundle.descriptors.length === 0 && <span className="muted small">none</span>}
+          {hasSuggestions && (
+            <a href="#suggestions" className={`sidebar-link ${active === "suggestions" ? "is-active" : ""}`} onClick={onClose}>
+              Suggestions for other files
+            </a>
+          )}
         </nav>
       </aside>
     </div>

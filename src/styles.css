@@ -519,6 +519,22 @@ tbody tr:hover td {
   margin-top: 8px;
 }
 
+/* suggestions on files that no descriptor section shows */
+.suggestions {
+  margin-top: 32px;
+}
+.suggestions h2 {
+  margin-bottom: 4px;
+}
+.suggestions-file {
+  margin-top: 14px;
+}
+.suggestions-file .col-title {
+  text-transform: none;
+  letter-spacing: 0;
+  justify-content: flex-start;
+}
+
 /* case card: expected left, one card per implementation right */
 .cases {
   display: flex;
