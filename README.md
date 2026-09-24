@@ -25,7 +25,7 @@ The bundle format is documented in the registry under `.github/test-runner-docs/
 ## Views
 
 - **Header**: pull request, tested commit, run, times, implementations with versions, totals, a "failures only" toggle.
-- **Overview**: one row per descriptor with the change kind, functions tested, pass and fail counts per implementation, a marker when implementations disagree, and the Sourcify verification status of the first deployment.
+- **Overview**: one row per descriptor with the change kind, functions tested, pass and fail counts per implementation, a marker when implementations disagree, and how many of its deployments have each Sourcify status, e.g. "2 verified" and "3 unverified".
 - **Descriptor**: deployments with verification, proxy resolution and "n of m functions in ABI"; every format with its cases, untested ones marked; recommendations.
 - **Case card**: the function, chain, contract and signer of the case. The expected screen from the test file on the left. One card per implementation on the right with its status, its screen with the differing cells marked, its message and warnings. A verdict pill in the case title: all pass, implementations disagree, or every implementation differs from the test.
 

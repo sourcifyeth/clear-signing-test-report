@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatName, type Deployment, type DescriptorReport } from "../lib/bundle";
-import { useDeployment } from "../lib/hooks";
+import { useDeployment, useDeployments } from "../lib/hooks";
 import { contractUrl } from "../lib/links";
 import type { ChainInfo, DeploymentInfo } from "../lib/sourcify";
 
@@ -162,12 +162,35 @@ export function Deployments({ d, chains }: { d: DescriptorReport; chains: Map<nu
   );
 }
 
-/** One pill for the overview: the verdict of the first deployment, and how many more there are. */
+/** The groups of the overview summary, in display order, with the pill text after the count. */
+const SUMMARY: { kinds: AbiVerdict["kind"][]; label: string; tone: "pass" | "fail" | "neutral"; logo?: boolean; title: string }[] = [
+  { kinds: ["verified", "ok"], label: "verified", tone: "pass", logo: true, title: "verified on Sourcify" },
+  { kinds: ["unverified"], label: "unverified", tone: "fail", title: "not verified on Sourcify" },
+  { kinds: ["impls-unverified"], label: "impl. unverified", tone: "fail", title: "a proxy with unverified implementations" },
+  { kinds: ["missing"], label: "not in ABI", tone: "fail", title: "functions of the descriptor are not in the verified ABI" },
+  { kinds: ["invalid-address"], label: "invalid address", tone: "fail", title: "invalid address in the descriptor" },
+  { kinds: ["lookup-failed"], label: "lookup failed", tone: "neutral", title: "the Sourcify lookup failed" },
+];
+
+/** The overview cell: how many deployments have each verdict, e.g. "2 verified" "3 unverified". */
 export function DeploymentsSummary({ d }: { d: DescriptorReport }) {
   const deps = deploymentsOf(d);
-  const first = deps[0];
-  const info = useDeployment(first?.chainId, first?.address);
+  const infos = useDeployments(deps);
   if (deps.length === 0) return <span className="muted small">none</span>;
-  const pill = verdictPill(abiVerdict(d, info));
-  return <VerdictPill pill={pill} suffix={deps.length > 1 ? ` +${deps.length - 1}` : ""} title={deps.length > 1 ? `first of ${deps.length} deployments` : undefined} />;
+  const verdicts = infos.map((info) => abiVerdict(d, info));
+  const checking = verdicts.filter((v) => v.kind === "checking").length;
+  if (checking > 0) {
+    const done = deps.length - checking;
+    return <span className="pill neutral">checking…{deps.length > 1 ? ` ${done}/${deps.length}` : ""}</span>;
+  }
+  const of = (n: number) => `${n} of ${deps.length} deployment${deps.length === 1 ? "" : "s"}`;
+  return (
+    <span className="deploy-summary">
+      {SUMMARY.map((g) => {
+        const n = verdicts.filter((v) => g.kinds.includes(v.kind)).length;
+        if (n === 0) return null;
+        return <VerdictPill key={g.label} pill={{ text: `${n} ${g.label}`, tone: g.tone, logo: g.logo }} title={`${of(n)}: ${g.title}`} />;
+      })}
+    </span>
+  );
 }
