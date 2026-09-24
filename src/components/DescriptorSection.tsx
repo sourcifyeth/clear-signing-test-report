@@ -1,10 +1,11 @@
-import { formatName, type Bundle, type DescriptorReport } from "../lib/bundle";
+import { formatName, recommendationText, type Bundle, type DescriptorReport } from "../lib/bundle";
 import { testedFormats, verdictCounts, verdictOf } from "../lib/classify";
 import { useTestFile } from "../lib/hooks";
 import { fileAtSha } from "../lib/links";
 import type { ChainInfo } from "../lib/sourcify";
 import { CaseCard } from "./CaseCard";
 import { Deployments } from "./Deployments";
+import { FileName } from "./Suggestions";
 
 interface Props {
   bundle: Bundle;
@@ -91,12 +92,14 @@ export function DescriptorSection({ bundle, d, n, chains, failuresOnly }: Props)
           {d.recommendations?.length > 0 && (
             <div className="small muted recs">
               {d.recommendations.map((r, i) => (
-                <div key={i}>
-                  {r.type === "no-interpolated-intent"
-                    ? `${formatName(String(r.format))}: no interpolatedIntent`
-                    : r.type === "deprecated-key"
-                      ? `uses the deprecated key ${String(r.key)}`
-                      : r.type}
+                <div key={i} title={r.pointer}>
+                  {recommendationText(r)}
+                  {r.file && r.file !== d.path && (
+                    <>
+                      {" "}
+                      (declared in <FileName bundle={bundle} file={r.file} />)
+                    </>
+                  )}
                 </div>
               ))}
             </div>

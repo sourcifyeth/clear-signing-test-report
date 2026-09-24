@@ -4,6 +4,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
 import { Landing } from "./components/Landing";
 import { Overview } from "./components/Overview";
+import { Suggestions } from "./components/Suggestions";
 import type { Bundle, RunIndexEntry } from "./lib/bundle";
 import { useChains } from "./lib/hooks";
 import { load, sourceFromLocation, type Source } from "./lib/loadBundle";
@@ -60,6 +61,7 @@ export function App() {
               <DescriptorSection key={d.path} bundle={state.bundle} d={d} n={i + 1} chains={chains} failuresOnly={failuresOnly} />
             ))}
             {state.bundle.descriptors.length === 0 && <p className="muted">This run tested no descriptor.</p>}
+            <Suggestions bundle={state.bundle} />
           </main>
         </div>
       )}

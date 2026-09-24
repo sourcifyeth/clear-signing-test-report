@@ -1,4 +1,4 @@
-import { SUPPORTED_SCHEMA_VERSIONS, type Bundle, type RunIndexEntry } from "./bundle";
+import { SUPPORTED_SCHEMA_VERSIONS, type Bundle, type DescriptorReport, type Recommendation, type RunIndexEntry } from "./bundle";
 import { REPORTS_RAW, isHttpsUrl } from "./links";
 
 export type Source =
@@ -48,6 +48,21 @@ async function fetchJson(url: string): Promise<unknown> {
   return res.json();
 }
 
+const REC_KEYS = ["format", "key", "file", "pointer", "message"] as const;
+
+/** The well-formed suggestions of a list: a string type, and only string values. */
+function cleanRecommendations(v: unknown): Recommendation[] {
+  if (!Array.isArray(v)) return [];
+  const out: Recommendation[] = [];
+  for (const item of v) {
+    if (!item || typeof item !== "object" || typeof item.type !== "string") continue;
+    const r: Recommendation = { type: item.type };
+    for (const k of REC_KEYS) if (typeof item[k] === "string") r[k] = item[k];
+    out.push(r);
+  }
+  return out;
+}
+
 /** Validates the little the viewer must rely on. Everything else is data. */
 export function checkBundle(data: unknown): Bundle {
   if (data === null || typeof data !== "object") throw new BundleError("The file is not a JSON object.");
@@ -66,7 +81,10 @@ export function checkBundle(data: unknown): Bundle {
     pr: { number: null, url: null, title: null, headSha: null, headRepo: null, baseSha: null, ...(b.pr ?? {}) },
     implementations: Array.isArray(b.implementations) ? b.implementations : [],
     missingTests: Array.isArray(b.missingTests) ? b.missingTests.filter((s) => typeof s === "string") : [],
-    descriptors: b.descriptors.filter((d) => d && typeof d === "object"),
+    descriptors: b.descriptors
+      .filter((d) => d && typeof d === "object")
+      .map((d): DescriptorReport => ({ ...d, recommendations: cleanRecommendations(d.recommendations) })),
+    ...(Array.isArray(b.recommendations) ? { recommendations: cleanRecommendations(b.recommendations) } : {}),
   };
 }
 

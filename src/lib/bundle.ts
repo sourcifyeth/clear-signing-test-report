@@ -67,10 +67,22 @@ export interface FormatEntry {
   cases: string[];
 }
 
-export type Recommendation =
-  | { type: "no-interpolated-intent"; format: string }
-  | { type: "deprecated-key"; key: string }
-  | { type: string; [k: string]: unknown };
+/**
+ * A suggestion to improve a descriptor. Known types are
+ * "no-interpolated-intent" (with `format`) and "deprecated-key" (with `key`);
+ * other types are shown with their `message`. `file` is the file that
+ * declares the format or key, which can be a shared file that the descriptor
+ * includes; `pointer` is a JSON pointer into that file. Every value is a
+ * string: loadBundle drops the other fields.
+ */
+export interface Recommendation {
+  type: string;
+  format?: string;
+  key?: string;
+  file?: string;
+  pointer?: string;
+  message?: string;
+}
 
 export interface DescriptorField {
   label?: string;
@@ -144,6 +156,8 @@ export interface Bundle {
   implementations: Implementation[];
   missingTests: string[];
   descriptors: DescriptorReport[];
+  /** The suggestions for every changed file, shared files included. Absent in older bundles. */
+  recommendations?: Recommendation[];
 }
 
 /** An entry of pr/<n>/index.json on the test-reports branch. */
@@ -166,6 +180,13 @@ export interface RunIndexEntry {
 
 export const isRendered = (v: unknown): v is Rendered =>
   v !== null && typeof v === "object" && !Array.isArray(v) && "fields" in (v as object);
+
+/** One line of text for a suggestion. */
+export function recommendationText(r: Recommendation): string {
+  if (r.type === "no-interpolated-intent" && r.format) return `${formatName(r.format)}: no interpolatedIntent`;
+  if (r.type === "deprecated-key" && r.key) return `uses the deprecated key ${r.key}`;
+  return r.message ?? r.type;
+}
 
 /** Short name of a format key: the function or type name. */
 export const formatName = (key: string | null): string => (key ? key.split("(")[0] : "—");
