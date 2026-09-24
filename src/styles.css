@@ -874,6 +874,35 @@ tbody tr:hover td {
 .sidebar-toggle:hover {
   color: var(--text);
 }
+/*
+ * Below 1440px the page margin is narrower than the outline button, so the
+ * button on the left edge covered the report header (and later the sticky
+ * descriptor heads). There the button sits in the top bar, left of the
+ * brand, and the open outline starts at the top of the window, under the
+ * button. The top bar reserves room for the button only on a report page.
+ */
+@media (max-width: 1439px) {
+  body:has(.sidebar-toggle) .topbarInner {
+    padding-left: 112px;
+  }
+  body:has(.sidebar-toggle) .brand {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .sidebar-toggle {
+    top: 12px; /* centred on the 32px brand row, under the 12px top padding */
+    left: 16px;
+    z-index: 22;
+    height: 32px;
+    border-left: 1px solid var(--border-strong);
+    border-radius: 8px;
+  }
+  .sidebar {
+    top: 0;
+    z-index: 21;
+    padding-top: 56px;
+  }
+}
 
 .h4-label {
   font-weight: 500;
