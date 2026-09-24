@@ -676,6 +676,15 @@ tbody tr:hover td {
   border-radius: 4px;
   padding: 0 4px;
 }
+/* "show all" / "show less" after a long value */
+.screen .value-toggle {
+  font-family: var(--sans);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.screen .diff .value-toggle {
+  color: inherit;
+}
 .message {
   margin-top: 8px;
   color: var(--fail);
