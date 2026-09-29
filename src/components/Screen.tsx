@@ -41,18 +41,16 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
   }
   const marked = (p: string) => (diffPaths?.has(p) ? " diff" : "");
   const fields = Array.isArray(rendered.fields) ? rendered.fields : [];
-  const intent = rendered.interpolatedIntent ?? rendered.intent;
+  const intent = rendered.intent;
+  const interpolated = rendered.interpolatedIntent;
   return (
     <div className={`screen${depth > 0 ? " nested" : ""}`}>
-      <div className={`intent${marked(at(prefix, "intent"))}${marked(at(prefix, "interpolatedIntent"))}`}>
+      <div className={`intent${marked(at(prefix, "intent"))}`}>
         {typeof intent === "string" && intent !== "" ? intent : <span className="muted">(no intent)</span>}
       </div>
       {/* The owner is metadata, not something the reviewer judges. It is shown only when it differs from the expected output. */}
       {rendered.owner !== undefined && marked(at(prefix, "owner")) !== "" && (
         <div className="owner diff">owner: {typeof rendered.owner === "string" ? rendered.owner : render(rendered.owner)}</div>
-      )}
-      {rendered.interpolatedIntent !== undefined && rendered.intent !== undefined && rendered.interpolatedIntent !== rendered.intent && (
-        <div className="intent-literal">intent: {render(rendered.intent)}</div>
       )}
       <div className="fields">
         {fields.length === 0 && <div className="field muted">no field</div>}
@@ -77,6 +75,13 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
           );
         })}
       </div>
+      {/* The sentence a wallet can show in place of the intent, with the values filled in. Below the fields, because it repeats them. */}
+      {interpolated !== undefined && interpolated !== intent && (
+        <div className={`interpolated${marked(at(prefix, "interpolatedIntent"))}`}>
+          <div className="interpolated-label">interpolated intent</div>
+          <div className="interpolated-text">{render(interpolated)}</div>
+        </div>
+      )}
     </div>
   );
 }
