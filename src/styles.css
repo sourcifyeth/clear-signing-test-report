@@ -1052,3 +1052,8 @@ button.impl-head:hover .impl-caret {
   vertical-align: -2px;
   margin-right: 4px;
 }
+
+.file-icon {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
