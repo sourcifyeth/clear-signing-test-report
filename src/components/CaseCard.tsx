@@ -63,6 +63,12 @@ function wei(v: string | undefined): string | null {
   return `${whole}${frac ? "." + frac : ""} native`;
 }
 
+const BeakerIcon = () => (
+  <svg className="icon case-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+    <path fill="currentColor" d="M5 5.782V2.5h-.25a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5H11v3.282l3.666 5.76C15.619 13.04 14.543 15 12.767 15H3.233c-1.776 0-2.852-1.96-1.899-3.458Zm-2.4 6.565a.75.75 0 0 0 .633 1.153h9.534a.75.75 0 0 0 .633-1.153L12.225 10.5h-8.45ZM9.5 2.5h-3V6c0 .143-.04.283-.117.403L4.73 9h6.54L9.617 6.403A.746.746 0 0 1 9.5 6Z" />
+  </svg>
+);
+
 export function CaseCard({ bundle, d, c, chains }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
   const verdict = verdictOf(c, implIds);
@@ -76,7 +82,11 @@ export function CaseCard({ bundle, d, c, chains }: Props) {
       <header className="case-head">
         <div className="case-title">
           <h4>
-            <span className="h4-label">Test case {c.index + 1}:</span> {c.description}
+            <span className="h4-label">
+              <BeakerIcon />
+              Test case {c.index + 1}:
+            </span>{" "}
+            {c.description}
           </h4>
           <span className={`pill ${VERDICT_PILL[verdict].tone}`}>{VERDICT_PILL[verdict].text}</span>
         </div>
