@@ -647,21 +647,15 @@ tbody tr:hover td {
   margin-top: 22px;
   padding-top: 14px;
   border-top: 1px dashed var(--border);
+  font-weight: 600;
+  font-size: 16px;
 }
-.screen .interpolated-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  margin-bottom: 2px;
-}
-.screen .interpolated-text {
-  font-size: 15px;
-}
-.screen .interpolated-text .filled {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+.screen .interpolated .filled {
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  cursor: help;
 }
 .screen .intent-label {
   font-weight: 400;

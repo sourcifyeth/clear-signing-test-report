@@ -43,17 +43,18 @@ function Value({ text }: { text: string }) {
  * comes from a pull request, so it is escaped and bounded before it becomes a
  * pattern.
  */
-function filledParts(text: string, template: string | null | undefined): { text: string; filled: boolean }[] | null {
+function filledParts(text: string, template: string | null | undefined): { text: string; param: string | null }[] | null {
   if (typeof template !== "string" || text.length > 1000) return null;
   const literals = template.split(/\{[^{}]*\}/);
+  const params = [...template.matchAll(/\{([^{}]*)\}/g)].map((p) => p[1].trim());
   if (literals.length < 2 || literals.length > 12) return null;
   const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const m = new RegExp(`^${literals.map(esc).join("([\\s\\S]+?)")}$`).exec(text);
   if (!m) return null;
-  const out: { text: string; filled: boolean }[] = [];
+  const out: { text: string; param: string | null }[] = [];
   literals.forEach((lit, i) => {
-    if (lit !== "") out.push({ text: lit, filled: false });
-    if (i < literals.length - 1) out.push({ text: m[i + 1], filled: true });
+    if (lit !== "") out.push({ text: lit, param: null });
+    if (i < literals.length - 1) out.push({ text: m[i + 1], param: params[i] ?? "" });
   });
   return out;
 }
@@ -103,15 +104,21 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0, template }
       {/* The sentence a wallet can show in place of the intent, with the values filled in. Below the fields, because it repeats them. */}
       {interpolated !== undefined && interpolated !== intent && (
         <div className={`interpolated${marked(at(prefix, "interpolatedIntent"))}`}>
-          <div className="interpolated-label">interpolated intent</div>
-          <div className="interpolated-text">
-            {(() => {
-              const text = render(interpolated);
-              const parts = depth === 0 ? filledParts(text, template) : null;
-              if (!parts) return text;
-              return parts.map((part, i) => (part.filled ? <span key={i} className="filled" title="filled from the transaction">{part.text}</span> : part.text));
-            })()}
-          </div>
+          <span className="intent-label">Interpolated intent:</span>{" "}
+          {(() => {
+            const text = render(interpolated);
+            const parts = depth === 0 ? filledParts(text, template) : null;
+            if (!parts) return text;
+            return parts.map((part, i) =>
+              part.param === null ? (
+                part.text
+              ) : (
+                <span key={i} className="filled" title={`Filled from the parameter {${part.param}}`}>
+                  {part.text}
+                </span>
+              ),
+            );
+          })()}
         </div>
       )}
     </div>
