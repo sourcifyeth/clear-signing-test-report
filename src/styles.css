@@ -650,12 +650,58 @@ tbody tr:hover td {
   font-weight: 600;
   font-size: 16px;
 }
+.screen .interpolated .intent-label {
+  margin-bottom: 2px;
+}
 .screen .interpolated .filled {
+  position: relative;
   text-decoration: underline dotted;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 4px;
   text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
   cursor: help;
+  outline: none;
+}
+/* The parameter behind a filled value. No delay: it shows at once. */
+.screen .param-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 5px 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.screen .param-tip code {
+  font-family: var(--mono);
+  color: var(--text);
+}
+.screen .param-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: var(--border-strong);
+}
+.screen .filled:hover .param-tip,
+.screen .filled:focus-visible .param-tip {
+  display: block;
+}
+.screen .filled:focus-visible {
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--info-bg);
 }
 .screen .intent-label {
   font-weight: 400;

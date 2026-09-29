@@ -104,7 +104,7 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0, template }
       {/* The sentence a wallet can show in place of the intent, with the values filled in. Below the fields, because it repeats them. */}
       {interpolated !== undefined && interpolated !== intent && (
         <div className={`interpolated${marked(at(prefix, "interpolatedIntent"))}`}>
-          <span className="intent-label">Interpolated intent:</span>{" "}
+          <div className="intent-label">Interpolated intent</div>
           {(() => {
             const text = render(interpolated);
             const parts = depth === 0 ? filledParts(text, template) : null;
@@ -113,8 +113,12 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0, template }
               part.param === null ? (
                 part.text
               ) : (
-                <span key={i} className="filled" title={`Filled from the parameter {${part.param}}`}>
+                <span key={i} className="filled" tabIndex={0}>
                   {part.text}
+                  {/* Hidden until hover or focus, and left out of the copied text. */}
+                  <span className="param-tip" role="tooltip">
+                    Filled from <code>{`{${part.param}}`}</code>
+                  </span>
                 </span>
               ),
             );
