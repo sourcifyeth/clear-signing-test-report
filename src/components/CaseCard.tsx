@@ -18,7 +18,7 @@ const STATUS_TEXT: Record<Status, string> = { pass: "pass", fail: "fail", error:
 type Result = NonNullable<Case["results"]>[string];
 
 /** One implementation's result. A pass starts collapsed: the screen equals the expected one. */
-function ImplCard({ name, result: r }: { name: string; result: Result | undefined }) {
+function ImplCard({ name, result: r, template }: { name: string; result: Result | undefined; template: string | null }) {
   const status: Status = r?.status ?? "error";
   const [open, setOpen] = useState(status !== "pass");
   const diffPaths = new Set((r?.diff ?? []).map((e) => e.path));
@@ -36,7 +36,7 @@ function ImplCard({ name, result: r }: { name: string; result: Result | undefine
       {open && (
         <div className="impl-body">
           {r?.rendered ? (
-            <Screen rendered={r.rendered} diffPaths={diffPaths} />
+            <Screen rendered={r.rendered} diffPaths={diffPaths} template={template} />
           ) : (
             <div className="screen screen-empty">{r ? "No rendered output." : "No result from this implementation."}</div>
           )}
@@ -72,6 +72,8 @@ const BeakerIcon = () => (
 export function CaseCard({ bundle, d, c, chains }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
   const verdict = verdictOf(c, implIds);
+  const templateValue = c.format ? d.head?.display?.formats?.[c.format]?.interpolatedIntent : null;
+  const template = typeof templateValue === "string" ? templateValue : null;
   const input = c.input ?? { type: "unknown" };
   const chain = typeof input.chainId === "number" ? chains.get(input.chainId)?.name ?? `chain ${input.chainId}` : null;
   const toUrl = contractUrl(input.chainId, input.to);
@@ -148,7 +150,7 @@ export function CaseCard({ bundle, d, c, chains }: Props) {
             <div className="section-sub">from the test file</div>
           </div>
           <div className="centered">
-            <Screen rendered={c.expected} />
+            <Screen rendered={c.expected} template={template} />
           </div>
         </div>
         <div className="compare-arrow" aria-hidden="true">
@@ -162,7 +164,7 @@ export function CaseCard({ bundle, d, c, chains }: Props) {
             <div className="section-sub">what each implementation rendered</div>
           </div>
           {bundle.implementations.map((impl) => (
-            <ImplCard key={impl.id} name={impl.implementation ?? impl.id} result={c.results?.[impl.id]} />
+            <ImplCard key={impl.id} name={impl.implementation ?? impl.id} result={c.results?.[impl.id]} template={template} />
           ))}
         </div>
       </div>

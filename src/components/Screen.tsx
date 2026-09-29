@@ -8,6 +8,8 @@ interface Props {
   diffPaths?: Set<string>;
   prefix?: string;
   depth?: number;
+  /** The interpolatedIntent template of the format, e.g. "List PUT {tokenId}". It marks the filled values. */
+  template?: string | null;
 }
 
 const at = (prefix: string, key: string) => (prefix === "" ? key : `${prefix}.${key}`);
@@ -34,8 +36,30 @@ function Value({ text }: { text: string }) {
   );
 }
 
+/**
+ * Splits an interpolated intent into the template's own text and the values
+ * the wallet filled in for its "{path}" placeholders. Null when the text does
+ * not follow the template, e.g. a runner rendered it differently. The template
+ * comes from a pull request, so it is escaped and bounded before it becomes a
+ * pattern.
+ */
+function filledParts(text: string, template: string | null | undefined): { text: string; filled: boolean }[] | null {
+  if (typeof template !== "string" || text.length > 1000) return null;
+  const literals = template.split(/\{[^{}]*\}/);
+  if (literals.length < 2 || literals.length > 12) return null;
+  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp(`^${literals.map(esc).join("([\\s\\S]+?)")}$`).exec(text);
+  if (!m) return null;
+  const out: { text: string; filled: boolean }[] = [];
+  literals.forEach((lit, i) => {
+    if (lit !== "") out.push({ text: lit, filled: false });
+    if (i < literals.length - 1) out.push({ text: m[i + 1], filled: true });
+  });
+  return out;
+}
+
 /** One rendered output drawn like a wallet screen. */
-export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
+export function Screen({ rendered, diffPaths, prefix = "", depth = 0, template }: Props) {
   if (!rendered || typeof rendered !== "object") {
     return <div className="screen screen-empty">No rendered output.</div>;
   }
@@ -46,6 +70,7 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
   return (
     <div className={`screen${depth > 0 ? " nested" : ""}`}>
       <div className={`intent${marked(at(prefix, "intent"))}`}>
+        <span className="intent-label">Intent:</span>{" "}
         {typeof intent === "string" && intent !== "" ? intent : <span className="muted">(no intent)</span>}
       </div>
       {/* The owner is metadata, not something the reviewer judges. It is shown only when it differs from the expected output. */}
@@ -79,7 +104,14 @@ export function Screen({ rendered, diffPaths, prefix = "", depth = 0 }: Props) {
       {interpolated !== undefined && interpolated !== intent && (
         <div className={`interpolated${marked(at(prefix, "interpolatedIntent"))}`}>
           <div className="interpolated-label">interpolated intent</div>
-          <div className="interpolated-text">{render(interpolated)}</div>
+          <div className="interpolated-text">
+            {(() => {
+              const text = render(interpolated);
+              const parts = depth === 0 ? filledParts(text, template) : null;
+              if (!parts) return text;
+              return parts.map((part, i) => (part.filled ? <span key={i} className="filled" title="filled from the transaction">{part.text}</span> : part.text));
+            })()}
+          </div>
         </div>
       )}
     </div>

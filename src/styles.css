@@ -644,8 +644,8 @@ tbody tr:hover td {
   letter-spacing: 0.06em;
 }
 .screen .interpolated {
-  margin-top: 14px;
-  padding-top: 10px;
+  margin-top: 22px;
+  padding-top: 14px;
   border-top: 1px dashed var(--border);
 }
 .screen .interpolated-label {
@@ -657,6 +657,15 @@ tbody tr:hover td {
 }
 .screen .interpolated-text {
   font-size: 15px;
+}
+.screen .interpolated-text .filled {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.screen .intent-label {
+  font-weight: 400;
+  color: var(--muted);
 }
 .screen .fields {
   margin-top: 8px;
