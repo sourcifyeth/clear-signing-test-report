@@ -532,7 +532,7 @@ tbody tr:hover td {
 .cases {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 44px;
 }
 .case {
   background: var(--card);
@@ -557,6 +557,10 @@ tbody tr:hover td {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.case-title h4 {
+  font-size: 17px;
+  line-height: 1.3;
 }
 .case-title .pill {
   flex: none;
