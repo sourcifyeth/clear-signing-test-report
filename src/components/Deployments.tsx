@@ -153,12 +153,21 @@ function DeploymentRow({ d, dep, chains }: { d: DescriptorReport; dep: Deploymen
 export function Deployments({ d, chains }: { d: DescriptorReport; chains: Map<number, ChainInfo> }) {
   const deps = deploymentsOf(d);
   if (deps.length === 0) return <p className="muted small">The descriptor lists no deployment.</p>;
+  const nChains = new Set(deps.map((dep) => dep.chainId)).size;
   return (
-    <ul className="deployments">
-      {deps.map((dep, i) => (
-        <DeploymentRow key={i} d={d} dep={dep} chains={chains} />
-      ))}
-    </ul>
+    <details className="deployments-box">
+      <summary>
+        <span className="small">
+          {deps.length} deployment{deps.length === 1 ? "" : "s"} across {nChains} chain{nChains === 1 ? "" : "s"}
+        </span>
+        <DeploymentsSummary d={d} />
+      </summary>
+      <ul className="deployments">
+        {deps.map((dep, i) => (
+          <DeploymentRow key={i} d={d} dep={dep} chains={chains} />
+        ))}
+      </ul>
+    </details>
   );
 }
 

@@ -1123,3 +1123,25 @@ button.impl-head:hover .impl-caret {
   margin-right: 6px;
   vertical-align: -2px;
 }
+
+/* the deployments list of a descriptor, collapsed under a count and the verdict pills */
+.deployments-box > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.deployments-box > summary::before {
+  content: "▸";
+  color: var(--muted);
+}
+.deployments-box[open] > summary::before {
+  content: "▾";
+}
+.deployments-box > summary::-webkit-details-marker {
+  display: none;
+}
+.deployments-box[open] > summary {
+  margin-bottom: 8px;
+}
