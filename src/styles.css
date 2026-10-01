@@ -903,6 +903,13 @@ tbody tr:hover td {
   padding-bottom: 3px;
   font-size: 12px;
 }
+.sidebar-link .icon {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  margin: 0 -4px 0 0;
+  color: var(--muted);
+}
 .sidebar-n {
   flex: none;
   min-width: 1.4em;

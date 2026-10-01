@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Bundle, DescriptorReport } from "../lib/bundle";
 import { verdictOf, type Verdict } from "../lib/classify";
-import { caseAnchorOf } from "./CaseCard";
-import { anchorOf } from "./DescriptorSection";
+import { BeakerIcon, caseAnchorOf } from "./CaseCard";
+import { anchorOf, FileIcon } from "./DescriptorSection";
 
 interface Props {
   bundle: Bundle;
@@ -90,6 +90,7 @@ export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
               <div key={d.path} className="sidebar-group">
                 <a href={`#${id}`} className={`sidebar-link ${active === id ? "is-active" : ""}`} title={d.path} onClick={onClose}>
                   <span className={`sig ${worstOf(d, implIds)}`} />
+                  <FileIcon />
                   <span className="sidebar-n">{i + 1}</span>
                   <span className="sidebar-name">{d.name}</span>
                 </a>
@@ -98,6 +99,7 @@ export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
                   return (
                     <a key={cid} href={`#${cid}`} className={`sidebar-link case-link ${active === cid ? "is-active" : ""}`} title={c.description} onClick={onClose}>
                       <span className={`sig ${CASE_DOT[verdictOf(c, implIds)]}`} />
+                      <BeakerIcon />
                       <span className="sidebar-n">{c.index + 1}</span>
                       <span className="sidebar-name">{c.description}</span>
                     </a>
