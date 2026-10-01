@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Bundle, DescriptorReport } from "../lib/bundle";
-import { verdictOf } from "../lib/classify";
+import { verdictOf, type Verdict } from "../lib/classify";
+import { caseAnchorOf } from "./CaseCard";
 import { anchorOf } from "./DescriptorSection";
 
 interface Props {
@@ -22,6 +23,9 @@ function worstOf(d: DescriptorReport, implIds: string[]): "fail" | "warn" | "pas
   }
   return worst;
 }
+
+/** The dot of one case. */
+const CASE_DOT: Record<Verdict, "fail" | "warn" | "pass" | "none"> = { pass: "pass", disagree: "warn", error: "warn", "all-differ": "fail", none: "none" };
 
 /** The id of the section that is closest to the top of the viewport. */
 function useActiveSection(ids: string[]): string | null {
@@ -52,7 +56,7 @@ function useActiveSection(ids: string[]): string | null {
 
 export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
   const implIds = bundle.implementations.map((i) => i.id);
-  const ids = ["overview", ...bundle.descriptors.map(anchorOf)];
+  const ids = ["overview", ...bundle.descriptors.flatMap((d) => [anchorOf(d), ...(d.cases ?? []).map((c) => caseAnchorOf(d, c))])];
   const active = useActiveSection(ids);
   useEffect(() => {
     if (!open) return;
@@ -83,11 +87,23 @@ export function Sidebar({ bundle, open, onToggle, onOpen, onClose }: Props) {
           {bundle.descriptors.map((d, i) => {
             const id = anchorOf(d);
             return (
-              <a key={d.path} href={`#${id}`} className={`sidebar-link ${active === id ? "is-active" : ""}`} title={d.path} onClick={onClose}>
-                <span className={`sig ${worstOf(d, implIds)}`} />
-                <span className="sidebar-n">{i + 1}</span>
-                <span className="sidebar-name">{d.name}</span>
-              </a>
+              <div key={d.path} className="sidebar-group">
+                <a href={`#${id}`} className={`sidebar-link ${active === id ? "is-active" : ""}`} title={d.path} onClick={onClose}>
+                  <span className={`sig ${worstOf(d, implIds)}`} />
+                  <span className="sidebar-n">{i + 1}</span>
+                  <span className="sidebar-name">{d.name}</span>
+                </a>
+                {(d.cases ?? []).map((c) => {
+                  const cid = caseAnchorOf(d, c);
+                  return (
+                    <a key={cid} href={`#${cid}`} className={`sidebar-link case-link ${active === cid ? "is-active" : ""}`} title={c.description} onClick={onClose}>
+                      <span className={`sig ${CASE_DOT[verdictOf(c, implIds)]}`} />
+                      <span className="sidebar-n">{c.index + 1}</span>
+                      <span className="sidebar-name">{c.description}</span>
+                    </a>
+                  );
+                })}
+              </div>
             );
           })}
           {bundle.descriptors.length === 0 && <span className="muted small">none</span>}
