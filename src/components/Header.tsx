@@ -101,8 +101,10 @@ export function Header({ bundle, index, currentRun, failuresOnly, onFailuresOnly
                 window.location.search = q.toString();
               }}
             >
-              {index.map((e) => (
+              {/* the index is newest first */}
+              {index.map((e, i) => (
                 <option key={e.runId} value={e.runId}>
+                  {i === 0 ? "(latest) " : ""}
                   {e.runId} · {e.headSha?.slice(0, 7)} · {utc(e.startedAt)}
                 </option>
               ))}
